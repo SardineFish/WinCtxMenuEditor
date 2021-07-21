@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ContextMenuEditor": {
+      "commandName": "Project",
+      "workingDirectory": "./"
+    }
+  }
+}

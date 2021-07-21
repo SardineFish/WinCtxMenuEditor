@@ -1,0 +1,29 @@
+﻿{
+  "directory": true,
+  "directory_background": true,
+  "drive": true,
+  "file_extensions": [".txt"],
+  "key": "TestCtxMenu",
+  "command": {
+    "name": "Context Menu Test",
+    "sub_commands": {
+      "Foo": {
+        "name": "Command Foo",
+        "shell": "Command Foo %1"
+      },
+      "Bar": {
+        "name": "Command Bar",
+        "shell": "Command Bar %1"
+      },
+      "SubCommand": {
+        "name": "Sub",
+        "sub_commands": {
+          "Foo": {
+            "name": "Command Foo",
+            "shell": "Command Foo %1"
+          }
+        }
+      }
+    }
+  }
+}
