@@ -10,25 +10,62 @@ namespace ContextMenuEditor
     {
         static void Main(string[] args)
         {
-            
-            var path = args.Length switch
+            var (command, path) = args.Length switch
             {
-                > 1 => args[1],
-                _ => "./config.json",
+                2 => ("create", args[1]),
+                3 => (args[1].ToLower(), args[2]),
+                _ => ("create", "./config.json"),
             };
             var config = JsonConvert.DeserializeObject<ContextMenuConfig>(File.ReadAllText(path));
 
-            if (config.Directory) 
-                CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"SOFTWARE\Classes\Directory\shell\{config.Key}"), config.Command);
-            if (config.DirectoryBackground)
-                CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}"), config.Command);
-            if (config.Drive)
-                CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"Software\Classes\Drive\shell\{config.Key}"), config.Command);
-            if (config.FileExtensions is not null)
-                foreach(var ext in config.FileExtensions)
-                {
-                    CreateContextMenu(Registry.ClassesRoot.OpenOrCreateKey($@"SystemFileAssociations\{ext}\shell\{config.Key}"), config.Command);
-                }
+            switch (command)
+            {
+                case "create":
+                case "add":
+                    {
+                        if (config.Directory)
+                            CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"SOFTWARE\Classes\Directory\shell\{config.Key}"), config.Command);
+                        if (config.DirectoryBackground)
+                            CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}"), config.Command);
+                        if (config.Drive)
+                            CreateContextMenu(Registry.CurrentUser.OpenOrCreateKey($@"Software\Classes\Drive\shell\{config.Key}"), config.Command);
+                        if (config.FileExtensions is not null)
+                            foreach (var ext in config.FileExtensions)
+                            {
+                                CreateContextMenu(Registry.ClassesRoot.OpenOrCreateKey($@"SystemFileAssociations\{ext}\shell\{config.Key}"), config.Command);
+                            }
+                        break;
+                    }
+                case "delete":
+                case "remove":
+                    {
+                        if (config.Directory)
+                        {
+                            Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\shell\{config.Key}");
+                            Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\shell\{config.Key}");
+                        }
+                        if (config.DirectoryBackground)
+                        {
+                            Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
+                            Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
+                        }
+                        if (config.Drive)
+                        {
+                            Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
+                            Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
+                        }
+                        if (config.FileExtensions is not null)
+                            foreach (var ext in config.FileExtensions)
+                            {
+                                Registry.ClassesRoot.DeleteSubKeyTree($@"SystemFileAssociations\{ext}\shell\{config.Key}");
+                                Console.WriteLine($@"Deleted Subkey tree \HKCR\SystemFileAssociations\{ext}\shell\{config.Key}");
+                            }
+                        break;
+                    }
+            }
+
+            Console.WriteLine("Completed");
+            Console.ReadKey();
         }
 
         static void CreateContextMenu(RegistryKey key, MenuCommand command)
@@ -51,7 +88,7 @@ namespace ContextMenuEditor
                 key.CreateSubKey("command", true).SetValue(null, command.Shell);
                 if (command.Icon is not null or "")
                     key.SetValue("Icon", command.Icon);
-                Console.Write($"Created Command '{command.Name}'");
+                Console.WriteLine($"Created Command '{command.Name}'");
             }
         }
     }
