@@ -12,8 +12,8 @@ namespace ContextMenuEditor
         {
             var (command, path) = args.Length switch
             {
-                2 => ("create", args[1]),
-                3 => (args[1].ToLower(), args[2]),
+                1 => ("create", args[0]),
+                2 => (args[0].ToLower(), args[1]),
                 _ => ("create", "./config.json"),
             };
             var config = JsonConvert.DeserializeObject<ContextMenuConfig>(File.ReadAllText(path));
@@ -39,17 +39,17 @@ namespace ContextMenuEditor
                 case "delete":
                 case "remove":
                     {
-                        if (config.Directory)
+                        if (config.Directory && Registry.CurrentUser.OpenSubKey($@"SOFTWARE\Classes\Directory\shell\{config.Key}") is not null)
                         {
                             Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\shell\{config.Key}");
                             Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\shell\{config.Key}");
                         }
-                        if (config.DirectoryBackground)
+                        if (config.DirectoryBackground && Registry.CurrentUser.OpenSubKey($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}") is not null)
                         {
                             Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
                             Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
                         }
-                        if (config.Drive)
+                        if (config.Drive && Registry.CurrentUser.OpenSubKey($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}") is not null)
                         {
                             Registry.CurrentUser.DeleteSubKeyTree($@"SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
                             Console.WriteLine($@"Deleted Subkey tree \HKCU\SOFTWARE\Classes\Directory\Background\shell\{config.Key}");
@@ -57,6 +57,8 @@ namespace ContextMenuEditor
                         if (config.FileExtensions is not null)
                             foreach (var ext in config.FileExtensions)
                             {
+                                if (Registry.ClassesRoot.OpenSubKey($@"SystemFileAssociations\{ext}\shell\{config.Key}") is null)
+                                    continue;
                                 Registry.ClassesRoot.DeleteSubKeyTree($@"SystemFileAssociations\{ext}\shell\{config.Key}");
                                 Console.WriteLine($@"Deleted Subkey tree \HKCR\SystemFileAssociations\{ext}\shell\{config.Key}");
                             }

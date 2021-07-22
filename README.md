@@ -66,11 +66,11 @@ See `config-example.json`
 This will create a context menu on hard-drive, directory, directory background and `*.txt` file like this:
 ```
 -----------------------
-| ...                 |
-| Context Menu Test > | ---------------
-| ...                 | | Command Foo |
------------------------ | Command Bar |
-                        | Sub Menu  > | ---------------
-                        --------------- | Command Foo |
-                                        ---------------
+| ...                 | ---------------
+| Context Menu Test > | | Command Foo |
+| ...                 | | Command Bar | ---------------
+----------------------- | Sub Menu  > | | Command Foo |
+                        --------------- ---------------
+                                        
+                                        
 ```
